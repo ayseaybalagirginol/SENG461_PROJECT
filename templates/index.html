@@ -2,22 +2,115 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Emotion Recognition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Recognizer</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
     <div class="container">
-        <h1>Emotion Recognition</h1>
+        <h1><img src="{{ url_for('static', filename='images/title.png') }}" alt="title" class="title-image"> </h1>
 
-        <div class="upload-box">
-            <input type="file" id="fileInput" accept="image/*">
-            <button onclick="upload()">Predict Emotion</button>
+        <div class="main-content">
+            <div class="input-container" id="dropArea">
+                <h2><img src="{{ url_for('static', filename='images/download.png') }}" alt="load" class="download-image"> Upload Image</h2>
+                <p>Drag & Drop an Image Here</p>
+                <h3>or</h3>
+                <div class="input-area">
+                    <input type="file" id="fileInput" accept="image/*">
+                    <label for="fileInput" class="custom-file-upload">
+                        Choose File
+                    </label>
+                </div>
+                <img id="previewImage" src="#" alt="Uploaded Image" style="max-width: 100%; display: none;">
+            </div>
+
+            <div class="result-container">
+                <h2>Predicted Emotion</h2>
+                <div id="emojiDisplay"></div>
+                <p id="result"></p>
+                <button id="predictButton" onclick="upload()">Predict Emotion</button>
+            </div>
         </div>
 
-        <pre id="result"></pre>
+    
     </div>
 
     <script src="/static/script.js"></script>
+    <script>
+        // JavaScript to display the selected image and handle drag-and-drop
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewImage = document.getElementById('previewImage');
+
+        let selectedFile;  // Store the selected file
+
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false)
+        });
+
+        function preventDefaults (e) {
+          e.preventDefault()
+          e.stopPropagation()
+        }
+
+        // Highlight drop area when item is dragged over it
+        ['dragenter', 'dragover'].forEach(eventName => {
+          dropArea.addEventListener(eventName, highlight, false)
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+          dropArea.addEventListener(eventName, unhighlight, false)
+        });
+
+        function highlight(e) {
+          dropArea.classList.add('highlight')
+        }
+
+        function unhighlight(e) {
+          dropArea.classList.remove('highlight')
+        }
+
+        // Handle dropped files
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+          let dt = e.dataTransfer
+          let files = dt.files
+
+          handleFiles(files)
+        }
+
+        function handleFiles(files) {
+            // Only process the first file if multiple files are dropped
+            const file = files[0];
+
+            if (file && file.type.startsWith('image/')) {
+                displayImage(file);
+                selectedFile = file; // Store the selected file
+            } else {
+                alert('Please drop an image file.');
+            }
+        }
+
+        // Handle file input change
+        fileInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                displayImage(file);
+                selectedFile = file;  // Store the selected file
+            }
+        });
+
+        function displayImage(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewImage.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+    </script>
 </body>
 </html>
